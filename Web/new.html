@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级五班月报导航</title>
+    <!-- 网页图标(favicon)：替换href为你的图标链接/本地路径 -->
+    <link rel="shortcut icon" href="../Others/85.ico" type="image/x-icon">
+    <link rel="icon" href="../Others/85.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", 微软雅黑, sans-serif;
+        }
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            scroll-behavior: smooth;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 顶部通栏：还原简洁纯蓝色，取消所有装饰 */
+        .top-bar {
+            width: 100%;
+            height: 50px;
+            background-color: #409eff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .top-bar .class-name {
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        /* 整体容器 */
+        .container {
+            width: 1200px;
+            margin: 60px auto 0;
+            display: flex;
+            gap: 20px;
+            padding-bottom: 50px;
+            flex: 1;
+        }
+        /* 左侧侧边栏 */
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+        }
+        .class-info {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f2f5;
+            margin-bottom: 20px;
+        }
+        /* 图片班徽样式（自动圆形适配） */
+        .class-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            border: 2px solid #e6f2ff;
+        }
+        .class-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .class-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .class-info p {
+            font-size: 12px;
+            color: #909399;
+            margin-top: 5px;
+        }
+        /* 导航菜单 */
+        .nav-menu {
+            list-style: none;
+            padding: 0 10px;
+        }
+        .nav-menu li {
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
+        .nav-menu a {
+            display: block;
+            padding: 12px 15px;
+            color: #606266;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-menu li.active a {
+            background-color: #e6f2ff;
+            color: #409eff;
+            font-weight: 600;
+        }
+        .nav-menu a:hover {
+            background-color: #f5f7fa;
+            color: #409eff;
+        }
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+        /* 主体内容区 */
+        .main-content {
+            flex: 1;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .main-content .section {
+            margin-bottom: 50px;
+            padding-top: 10px;
+        }
+        /* 板块标题（深黑粗体，最醒目） */
+        .main-content h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f2f5;
+            font-weight: 700;
+            color: #222;
+        }
+        /* 正文文字（浅黑粗体，留空版，方便填写） */
+        .main-content .tip {
+            color: #333;
+            font-size: 14px;
+            line-height: 2;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        /* 班级活动-照片排版 */
+        .photo-wall {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .photo-item {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-item:hover {
+            transform: scale(1.03);
+        }
+        /* 历史月报-微博式消息卡片 */
+        .weibo-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .weibo-card {
+            padding: 20px;
+            border: 1px solid #f0f2f5;
+            border-radius: 8px;
+            transition: box-shadow 0.3s;
+        }
+        .weibo-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .weibo-card .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .weibo-card .card-time {
+            font-size: 12px;
+            color: #909399;
+            font-weight: normal;
+        }
+        .weibo-card .card-desc {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-weight: 500;
+        }
+        .weibo-card .card-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #e6f2ff;
+            color: #409eff;
+            font-size: 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .weibo-card .card-btn:hover {
+            background-color: #409eff;
+            color: #fff;
+        }
+        /* 底部版权声明栏 */
+        .copyright {
+            width: 100%;
+            height: 60px;
+            background-color: #fff;
+            margin-top: 30px;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #909399;
+            font-weight: 400;
+        }
+        /* 响应式适配 */
+        @media (max-width: 1200px) {
+            .container {
+                width: 95%;
+            }
+            .photo-wall {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 180px;
+            }
+            .class-avatar {
+                width: 60px;
+                height: 60px;
+            }
+            .photo-wall {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .copyright {
+                font-size: 12px;
+                padding: 0 10px;
+                text-align: center;
+            }
+            .top-bar .class-name {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部通栏：还原简洁纯蓝色，无任何装饰 -->
+    <div class="top-bar">
+        <div class="class-name">超级五班月报导航</div>
+    </div>
+
+    <!-- 整体内容容器 -->
+    <div class="container">
+        <!-- 左侧导航栏（图片班徽版） -->
+        <aside class="sidebar">
+            <div class="class-info">
+                <!-- 图片班徽：替换src为你的班徽图片链接/本地路径 -->
+                <div class="class-avatar">
+                    <img src="../Others/85.jpg" alt="班级徽章">
+                </div>
+                <h3>超级五班</h3>
+                <p>本月月报 · 2026年2月</p>
+            </div>
+            <ul class="nav-menu">
+                <li data-target="summary"><a href="#summary"><span class="nav-icon">📋</span>本月班级总结</a></li>
+                <li data-target="activity"><a href="#activity"><span class="nav-icon">📸</span>班级活动记录</a></li>
+                <li data-target="study"><a href="#study"><span class="nav-icon">📚</span>学习情况榜单</a></li>
+                <li data-target="honor"><a href="#honor"><span class="nav-icon">🏆</span>班级荣誉墙</a></li>
+                <li data-target="notice"><a href="#notice"><span class="nav-icon">📢</span>下月重点通知</a></li>
+                <li data-target="suggest"><a href="#suggest"><span class="nav-icon">💡</span>同学建言献策</a></li>
+                <li data-target="file"><a href="#file"><span class="nav-icon">📁</span>月报文件下载</a></li>
+                <li data-target="history"><a href="#history"><span class="nav-icon">📜</span>历史月报归档</a></li>
+            </ul>
+        </aside>
+
+        <!-- 右侧主体内容区：所有板块正文大幅留空，方便填写 -->
+        <main class="main-content">
+            <!-- 本月班级总结：留空版 -->
+            <div class="section" id="summary">
+                <h2>本月班级总结</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月，本班本月主要开展了________________________等工作，整体班风学风________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;学习方面：________________________，各科成绩________________________，进步同学有________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;活动方面：________________________，参与情况________________________，取得了________________________的成果。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;班级建设方面：________________________，班级规章制度________________________，同学间相处________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;本月存在的问题：________________________，后续改进措施：________________________。
+                </p>
+            </div>
+
+            <!-- 班级活动记录：留空版 -->
+            <div class="section" id="activity">
+                <h2>班级活动记录</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月，本班共开展________________________项班级活动，具体如下：
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;1. 活动名称：________________________，开展时间：________________________，参与人员：________________________，活动成果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;2. 活动名称：________________________，开展时间：________________________，参与人员：________________________，活动成果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;3. 活动名称：________________________，开展时间：________________________，参与人员：________________________，活动成果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;以下为活动现场照片（点击可预览大图）：
+                </p>
+                <div class="photo-wall">
+                    <!-- 替换src为你的活动照片链接/本地路径，可增删 -->
+                    <div class="photo-item"><img src="活动照片1.png" alt="班级活动1"></div>
+                    <div class="photo-item"><img src="活动照片2.png" alt="班级活动2"></div>
+                    <div class="photo-item"><img src="活动照片3.png" alt="班级活动3"></div>
+                    <div class="photo-item"><img src="活动照片4.png" alt="班级活动4"></div>
+                    <div class="photo-item"><img src="活动照片5.png" alt="班级活动5"></div>
+                    <div class="photo-item"><img src="活动照片6.png" alt="班级活动6"></div>
+                    <div class="photo-item"><img src="活动照片7.png" alt="班级活动7"></div>
+                    <div class="photo-item"><img src="活动照片8.png" alt="班级活动8"></div>
+                </div>
+            </div>
+
+            <!-- 学习情况榜单：留空版 -->
+            <div class="section" id="study">
+                <h2>学习情况榜单</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月，本班本月学习整体情况________________________，各科平均分/排名________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;一、总分排名前十：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;2. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;3. ____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;4. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;5. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;6. ____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;7. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;8. ____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;9. ____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;10. ____________ 分数：____________
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;二、单科状元：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;语文：____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;数学：____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;英语：____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;物理：____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;化学：____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;生物：____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;历史：____________ 分数：____________&nbsp;&nbsp;&nbsp;&nbsp;地理：____________ 分数：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;政治：____________ 分数：____________
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;三、进步之星（进步幅度前5）：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. ____________ 进步：____________&nbsp;&nbsp;&nbsp;&nbsp;2. ____________ 进步：____________&nbsp;&nbsp;&nbsp;&nbsp;3. ____________ 进步：____________
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;4. ____________ 进步：____________&nbsp;&nbsp;&nbsp;&nbsp;5. ____________ 进步：____________
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;四、学习待提升同学及帮扶计划：________________________。
+                </p>
+            </div>
+
+            <!-- 班级荣誉墙：留空版 -->
+            <div class="section" id="honor">
+                <h2>班级荣誉墙</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月，本班及班级同学共获得________________________项荣誉，具体如下：
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;一、班级集体荣誉：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. ________________________，颁发单位：________________________，颁发时间：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;2. ________________________，颁发单位：________________________，颁发时间：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;二、同学个人荣誉：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. ____________：________________________，颁发单位：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;2. ____________：________________________，颁发单位：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;3. ____________：________________________，颁发单位：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;4. ____________：________________________，颁发单位：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;5. ____________：________________________，颁发单位：________________________。
+                </p>
+            </div>
+
+            <!-- 下月重点通知：留空版 -->
+            <div class="section" id="notice">
+                <h2>下月重点通知</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年3月，本班下月重点工作/通知如下，望全体同学知悉并遵守：
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;1. 学习方面：________________________，截止时间：________________________，要求：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;2. 活动方面：________________________，开展时间：________________________，参与要求：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;3. 班级事务：________________________，完成时间：________________________，负责人：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;4. 学校通知：________________________，执行要求：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;5. 其他事项：________________________。
+                </p>
+            </div>
+
+            <!-- 同学建言献策：留空版 -->
+            <div class="section" id="suggest">
+                <h2>同学建言献策</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月，本班共收集到同学建言献策________________________条，经班委讨论，采纳________________________条，具体如下：
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;一、学习类建议（共____条，采纳____条）：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;2. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;二、活动类建议（共____条，采纳____条）：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;2. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;三、班级建设类建议（共____条，采纳____条）：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;2. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;四、其他类建议（共____条，采纳____条）：
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;1. 建议内容：________________________，提出人：____________，处理结果：________________________。
+                </p>
+            </div>
+
+            <!-- 月报文件下载：留空版 -->
+            <div class="section" id="file">
+                <h2>月报文件下载</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;2026年2月班级月报相关文件已整理完毕，可点击下方链接下载，提取码统一为：________________________，文件有效期：________________________。
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;1. 2026年2月班级月报完整版（Word）：<a href="#" style="color:#409eff;">点击下载</a>
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;2. 2026年2月班级成绩表（Excel）：<a href="#" style="color:#409eff;">点击下载</a>
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;3. 2026年2月班级活动照片压缩包：<a href="#" style="color:#409eff;">点击下载</a>
+                    <br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;4. 其他文件：________________________ <a href="#" style="color:#409eff;">点击下载</a>
+                </p>
+            </div>
+
+            <!-- 历史月报归档：2026.2-2027.6 每月2日，共17期 -->
+            <div class="section" id="history">
+                <h2>历史月报归档</h2>
+                <p class="tip">
+                    &nbsp;&nbsp;&nbsp;&nbsp;以下为2026年2月-2027年6月班级历史月报，每月2日更新，点击「查看详情」可查看对应月份完整月报内容，所有文件仅供班级内部使用。
+                </p>
+                <div class="weibo-card-list">
+                    <!-- 第1期：2026年2月（最新） -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年2月班级月报 <span class="card-time">2026-02-02</span></div>
+                        <div class="card-desc">2026年2月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第2期：2026年3月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年3月班级月报 <span class="card-time">2026-03-02</span></div>
+                        <div class="card-desc">2026年3月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第3期：2026年4月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年4月班级月报 <span class="card-time">2026-04-02</span></div>
+                        <div class="card-desc">2026年4月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第4期：2026年5月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年5月班级月报 <span class="card-time">2026-05-02</span></div>
+                        <div class="card-desc">2026年5月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第5期：2026年6月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年6月班级月报 <span class="card-time">2026-06-02</span></div>
+                        <div class="card-desc">2026年6月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第6期：2026年7月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年7月班级月报 <span class="card-time">2026-07-02</span></div>
+                        <div class="card-desc">2026年7月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第7期：2026年8月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年8月班级月报 <span class="card-time">2026-08-02</span></div>
+                        <div class="card-desc">2026年8月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第8期：2026年9月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年9月班级月报 <span class="card-time">2026-09-02</span></div>
+                        <div class="card-desc">2026年9月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第9期：2026年10月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年10月班级月报 <span class="card-time">2026-10-02</span></div>
+                        <div class="card-desc">2026年10月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第10期：2026年11月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年11月班级月报 <span class="card-time">2026-11-02</span></div>
+                        <div class="card-desc">2026年11月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第11期：2026年12月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2026年12月班级月报 <span class="card-time">2026-12-02</span></div>
+                        <div class="card-desc">2026年12月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第12期：2027年1月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年1月班级月报 <span class="card-time">2027-01-02</span></div>
+                        <div class="card-desc">2027年1月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第13期：2027年2月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年2月班级月报 <span class="card-time">2027-02-02</span></div>
+                        <div class="card-desc">2027年2月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第14期：2027年3月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年3月班级月报 <span class="card-time">2027-03-02</span></div>
+                        <div class="card-desc">2027年3月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第15期：2027年4月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年4月班级月报 <span class="card-time">2027-04-02</span></div>
+                        <div class="card-desc">2027年4月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第16期：2027年5月 -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年5月班级月报 <span class="card-time">2027-05-02</span></div>
+                        <div class="card-desc">2027年5月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                    <!-- 第17期：2027年6月（最后一期） -->
+                    <div class="weibo-card">
+                        <div class="card-title">2027年6月班级月报 <span class="card-time">2027-06-02</span></div>
+                        <div class="card-desc">2027年6月班级完整月报，含本月总结、活动记录、学习榜单、荣誉墙、下月通知等全部内容。</div>
+                        <a href="#" target="_blank" class="card-btn">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 网页底部版权声明：可自定义文字 -->
+    <div class="copyright">
+        ©2026-2027 超级五班月报导航 | 所有内容均为班级内部使用，禁止私自转发!!!违者必究!!!<a href="#" style="color:#409eff;">点击下载</a>
+    </div>
+
+    <script>
+        // 全局元素获取
+        const navItems = document.querySelectorAll('.nav-menu li');
+        const sections = document.querySelectorAll('.main-content .section');
+        const photoItems = document.querySelectorAll('.photo-item');
+
+        // 1. 导航点击切换active+平滑滚动
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                navItems.forEach(li => li.classList.remove('active'));
+                item.classList.add('active');
+                const targetId = item.dataset.target;
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 2. 滚动联动导航高亮核心功能
+        function highlightNavOnScroll() {
+            const scrollTop = window.scrollY + 70;
+            let currentActive = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                if (scrollTop >= sectionTop && scrollTop < sectionTop + sectionHeight) {
+                    currentActive = section.id;
+                }
+            });
+            navItems.forEach(item => {
+                item.dataset.target === currentActive ? item.classList.add('active') : item.classList.remove('active');
+            });
+        }
+        // 节流优化，避免卡顿
+        let throttleTimer = null;
+        window.addEventListener('scroll', () => {
+            if (!throttleTimer) {
+                throttleTimer = setTimeout(() => {
+                    highlightNavOnScroll();
+                    throttleTimer = null;
+                }, 50);
+            }
+        });
+        window.addEventListener('load', highlightNavOnScroll);
+
+        // 3. 照片点击放大预览
+        photoItems.forEach(photo => {
+            photo.addEventListener('click', () => {
+                const imgSrc = photo.querySelector('img').src;
+                const imgAlt = photo.querySelector('img').alt;
+                const preview = document.createElement('div');
+                preview.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+                preview.innerHTML = `<img src="${imgSrc}" alt="${imgAlt}" style="max-width:90%;max-height:90%;border-radius:6px;">`;
+                document.body.appendChild(preview);
+                preview.addEventListener('click', () => document.body.removeChild(preview));
+            });
+        });
+    </script>
+</body>
+</html>
